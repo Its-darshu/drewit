@@ -4,6 +4,7 @@ import { drawElement, createElement } from '../services/drawingService';
 import { useHistory } from '../hooks/useHistory';
 import rough from 'roughjs/bundled/rough.esm';
 
+// DrawingCanvas component for the sketch interface
 export const DrawingCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [elements, setElements, undo, redo, canUndo, canRedo] = useHistory<SketchElement>([]);
