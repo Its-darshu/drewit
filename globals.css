@@ -1,2 +1,23 @@
 
-/* Using Tailwind via CDN in index.html, this file is for module resolution. */
+/* Basic global styles */
+html, body, #root {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+canvas {
+	display: block;
+}
+
+.font-virgil {
+	font-family: 'Virgil', cursive, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+textarea.font-virgil {
+	font-family: 'Virgil', cursive;
+}
