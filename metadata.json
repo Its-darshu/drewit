@@ -1,0 +1,5 @@
+{
+  "name": "SketchBoard",
+  "description": "A simple, fast, and collaborative online whiteboard with a distinct, low-fidelity, hand-drawn aesthetic. This MVP focuses on a local-first experience with core drawing and editing tools.",
+  "requestFramePermissions": []
+}
