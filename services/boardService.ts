@@ -11,7 +11,10 @@ import {
   orderBy, 
   serverTimestamp,
   onSnapshot,
-  Timestamp 
+  Timestamp,
+  connectFirestoreEmulator,
+  enableNetwork,
+  disableNetwork
 } from 'firebase/firestore';
 import { getFirestoreDb } from './firebase';
 import { SketchElement } from '../types';
@@ -291,5 +294,38 @@ class BoardService {
     }
   }
 }
+
+// Test Firestore connection
+export const testFirestoreConnection = async (): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const db = getFirestoreDb();
+    
+    // Try to create a test collection reference
+    const testCollection = collection(db, 'connection-test');
+    
+    // Try to add a test document
+    const testDoc = await addDoc(testCollection, {
+      test: true,
+      timestamp: serverTimestamp()
+    });
+    
+    // Try to read the document back
+    const docSnap = await getDoc(testDoc);
+    
+    if (docSnap.exists()) {
+      // Clean up test document
+      await deleteDoc(testDoc);
+      return { success: true };
+    } else {
+      return { success: false, error: 'Document was not created properly' };
+    }
+  } catch (error: any) {
+    console.error('Firestore connection test failed:', error);
+    return { 
+      success: false, 
+      error: `${error.code || 'unknown'}: ${error.message}` 
+    };
+  }
+};
 
 export const boardService = new BoardService();

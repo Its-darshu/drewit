@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firestore Test</title>
+</head>
+<body>
+    <h1>Firestore Connection Test</h1>
+    <button id="testBtn">Test Firestore Connection</button>
+    <div id="results"></div>
+
+    <script type="module">
+        import { initializeApp } from 'firebase/app';
+        import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyArsrON4pdSGX6n5L64DHTUfXHFhf2dH8o",
+            authDomain: "drewit-7d6d9.firebaseapp.com",
+            projectId: "drewit-7d6d9",
+            storageBucket: "drewit-7d6d9.firebasestorage.app",
+            messagingSenderId: "632636093624",
+            appId: "1:632636093624:web:90cb8d84a1c5bf4142ce5f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing Firestore connection...</p>';
+
+            try {
+                // Test 1: Try to create a simple document
+                console.log('Testing Firestore write...');
+                const testDoc = doc(db, 'test', 'connection');
+                await setDoc(testDoc, {
+                    message: 'Hello Firestore!',
+                    timestamp: new Date()
+                });
+                results.innerHTML += '<p>✅ Write test passed</p>';
+
+                // Test 2: Try to read the document
+                console.log('Testing Firestore read...');
+                const docSnap = await getDoc(testDoc);
+                if (docSnap.exists()) {
+                    results.innerHTML += '<p>✅ Read test passed</p>';
+                    results.innerHTML += `<p>Data: ${JSON.stringify(docSnap.data())}</p>`;
+                } else {
+                    results.innerHTML += '<p>❌ Document not found</p>';
+                }
+
+                results.innerHTML += '<p>🎉 All tests passed!</p>';
+            } catch (error) {
+                console.error('Firestore test failed:', error);
+                results.innerHTML += `<p>❌ Error: ${error.message}</p>`;
+                results.innerHTML += `<p>Error code: ${error.code}</p>`;
+                
+                if (error.code === 'permission-denied') {
+                    results.innerHTML += '<p>🔧 Fix: Update Firestore security rules</p>';
+                } else if (error.code === 'unavailable') {
+                    results.innerHTML += '<p>🔧 Fix: Check if Firestore is enabled in Firebase Console</p>';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

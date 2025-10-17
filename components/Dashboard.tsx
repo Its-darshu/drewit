@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { DrawingCanvas } from './DrawingCanvas';
-import { boardService, BoardMetadata } from '../services/boardService';
+import { boardService, BoardMetadata, testFirestoreConnection } from '../services/boardService';
 
 export const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -12,6 +12,7 @@ export const Dashboard = () => {
   const [newBoardDescription, setNewBoardDescription] = useState('');
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [connectionTest, setConnectionTest] = useState<{ success: boolean; error?: string } | null>(null);
 
   // Load user's boards on component mount
   useEffect(() => {
@@ -65,6 +66,13 @@ export const Dashboard = () => {
     }
   };
 
+  const handleTestConnection = async () => {
+    console.log('Testing Firestore connection...');
+    const result = await testFirestoreConnection();
+    setConnectionTest(result);
+    console.log('Connection test result:', result);
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -116,6 +124,12 @@ export const Dashboard = () => {
               <p className="text-sm text-gray-500">Welcome back, {user?.displayName}</p>
             </div>
             <div className="flex items-center space-x-4">
+              <button
+                onClick={handleTestConnection}
+                className="text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-md hover:bg-yellow-200"
+              >
+                Test DB Connection
+              </button>
               <img
                 src={user?.photoURL || ''}
                 alt={user?.displayName || ''}
@@ -133,6 +147,37 @@ export const Dashboard = () => {
       </header>
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Connection Test Results */}
+        {connectionTest && (
+          <div className={`mb-6 p-4 rounded-md ${
+            connectionTest.success 
+              ? 'bg-green-50 border border-green-200' 
+              : 'bg-red-50 border border-red-200'
+          }`}>
+            <div className="flex items-center">
+              <div className={`flex-shrink-0 ${
+                connectionTest.success ? 'text-green-400' : 'text-red-400'
+              }`}>
+                {connectionTest.success ? '✅' : '❌'}
+              </div>
+              <div className="ml-3">
+                <h3 className={`text-sm font-medium ${
+                  connectionTest.success ? 'text-green-800' : 'text-red-800'
+                }`}>
+                  {connectionTest.success ? 'Firestore Connection Successful' : 'Firestore Connection Failed'}
+                </h3>
+                {connectionTest.error && (
+                  <div className={`mt-2 text-sm ${
+                    connectionTest.success ? 'text-green-700' : 'text-red-700'
+                  }`}>
+                    Error: {connectionTest.error}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-medium text-gray-900">Your Boards</h2>
           <button
