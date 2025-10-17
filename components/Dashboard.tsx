@@ -1,36 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { DrawingCanvas } from './DrawingCanvas';
-
-interface Board {
-  id: string;
-  name: string;
-  thumbnail?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { boardService, BoardMetadata } from '../services/boardService';
 
 export const Dashboard = () => {
   const { user, logout } = useAuth();
-  const [boards, setBoards] = useState<Board[]>([]);
+  const [boards, setBoards] = useState<BoardMetadata[]>([]);
   const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
   const [showNewBoardModal, setShowNewBoardModal] = useState(false);
   const [newBoardName, setNewBoardName] = useState('');
+  const [newBoardDescription, setNewBoardDescription] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
 
-  const handleCreateBoard = () => {
-    if (!newBoardName.trim()) return;
+  // Load user's boards on component mount
+  useEffect(() => {
+    if (!user) return;
+
+    setLoading(true);
     
-    const newBoard: Board = {
-      id: Date.now().toString(),
-      name: newBoardName,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    // Subscribe to real-time updates of user's boards
+    const unsubscribe = boardService.subscribeToUserBoards(user.uid, (updatedBoards) => {
+      setBoards(updatedBoards);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const handleCreateBoard = async () => {
+    if (!newBoardName.trim() || !user || creating) return;
     
-    setBoards(prev => [newBoard, ...prev]);
-    setNewBoardName('');
-    setShowNewBoardModal(false);
-    setSelectedBoard(newBoard.id);
+    setCreating(true);
+    try {
+      const boardId = await boardService.createBoard(
+        newBoardName.trim(),
+        user.uid,
+        user.email || '',
+        newBoardDescription.trim()
+      );
+      
+      setNewBoardName('');
+      setNewBoardDescription('');
+      setShowNewBoardModal(false);
+      setSelectedBoard(boardId);
+    } catch (error) {
+      console.error('Failed to create board:', error);
+      alert('Failed to create board. Please try again.');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDeleteBoard = async (boardId: string, boardName: string) => {
+    if (!confirm(`Are you sure you want to delete "${boardName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await boardService.deleteBoard(boardId);
+    } catch (error) {
+      console.error('Failed to delete board:', error);
+      alert('Failed to delete board. Please try again.');
+    }
   };
 
   const handleLogout = async () => {
@@ -68,7 +100,7 @@ export const Dashboard = () => {
           </div>
         </header>
         <div className="flex-1">
-          <DrawingCanvas />
+          <DrawingCanvas boardId={selectedBoard} />
         </div>
       </div>
     );
@@ -111,7 +143,12 @@ export const Dashboard = () => {
           </button>
         </div>
 
-        {boards.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-2 text-sm text-gray-500">Loading your boards...</p>
+          </div>
+        ) : boards.length === 0 ? (
           <div className="text-center py-12">
             <svg
               className="mx-auto h-12 w-12 text-gray-400"
@@ -142,10 +179,12 @@ export const Dashboard = () => {
             {boards.map((board) => (
               <div
                 key={board.id}
-                className="bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => setSelectedBoard(board.id)}
+                className="bg-white rounded-lg shadow hover:shadow-md transition-shadow group relative"
               >
-                <div className="aspect-w-16 aspect-h-10 bg-gray-100 rounded-t-lg">
+                <div 
+                  className="aspect-w-16 aspect-h-10 bg-gray-100 rounded-t-lg cursor-pointer"
+                  onClick={() => setSelectedBoard(board.id)}
+                >
                   {board.thumbnail ? (
                     <img
                       src={board.thumbnail}
@@ -160,11 +199,37 @@ export const Dashboard = () => {
                     </div>
                   )}
                 </div>
-                <div className="p-4">
+                
+                {/* Delete button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteBoard(board.id, board.name);
+                  }}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                  title="Delete board"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+
+                <div 
+                  className="p-4 cursor-pointer"
+                  onClick={() => setSelectedBoard(board.id)}
+                >
                   <h3 className="text-sm font-medium text-gray-900 truncate">{board.name}</h3>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Updated {board.updatedAt.toLocaleDateString()}
-                  </p>
+                  {board.description && (
+                    <p className="text-xs text-gray-500 mt-1 truncate">{board.description}</p>
+                  )}
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-xs text-gray-500">
+                      Updated {board.updatedAt.toLocaleDateString()}
+                    </p>
+                    <span className="text-xs text-gray-400">
+                      {board.elementCount} elements
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -177,26 +242,54 @@ export const Dashboard = () => {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Create New Board</h3>
-            <input
-              type="text"
-              value={newBoardName}
-              onChange={(e) => setNewBoardName(e.target.value)}
-              placeholder="Enter board name"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              onKeyDown={(e) => e.key === 'Enter' && handleCreateBoard()}
-            />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Board Name *
+                </label>
+                <input
+                  type="text"
+                  value={newBoardName}
+                  onChange={(e) => setNewBoardName(e.target.value)}
+                  placeholder="Enter board name"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleCreateBoard()}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description (optional)
+                </label>
+                <textarea
+                  value={newBoardDescription}
+                  onChange={(e) => setNewBoardDescription(e.target.value)}
+                  placeholder="Enter board description"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                />
+              </div>
+            </div>
             <div className="flex justify-end space-x-3 mt-6">
               <button
-                onClick={() => setShowNewBoardModal(false)}
+                onClick={() => {
+                  setShowNewBoardModal(false);
+                  setNewBoardName('');
+                  setNewBoardDescription('');
+                }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                disabled={creating}
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateBoard}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                disabled={!newBoardName.trim() || creating}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
-                Create
+                {creating && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                )}
+                <span>{creating ? 'Creating...' : 'Create'}</span>
               </button>
             </div>
           </div>

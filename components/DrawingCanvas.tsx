@@ -2,15 +2,62 @@ import React, { useRef, useEffect, useState } from 'react';
 import { SketchElement, Tool } from '../types';
 import { drawElement, createElement } from '../services/drawingService';
 import { useHistory } from '../hooks/useHistory';
+import { boardService } from '../services/boardService';
+import { useAuth } from '../hooks/useAuth';
 import rough from 'roughjs/bundled/rough.esm';
 
+interface DrawingCanvasProps {
+  boardId?: string;
+}
+
 // DrawingCanvas component for the sketch interface
-export const DrawingCanvas = () => {
+export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ boardId }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { user } = useAuth();
   const [elements, setElements, undo, redo, canUndo, canRedo] = useHistory<SketchElement>([]);
   const [tool, setTool] = useState<Tool>(Tool.RECTANGLE);
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load board data when boardId changes
+  useEffect(() => {
+    if (boardId && user) {
+      const loadBoard = async () => {
+        try {
+          const board = await boardService.getBoard(boardId);
+          if (board && board.elements) {
+            setElements(board.elements, false);
+          }
+        } catch (error) {
+          console.error('Failed to load board:', error);
+        }
+      };
+      loadBoard();
+    }
+  }, [boardId, user, setElements]);
+
+  // Auto-save when elements change
+  useEffect(() => {
+    if (boardId && user && elements.length > 0) {
+      const saveBoard = async () => {
+        if (isSaving) return; // Prevent multiple saves
+        
+        setIsSaving(true);
+        try {
+          await boardService.updateBoardElements(boardId, elements);
+        } catch (error) {
+          console.error('Failed to save board:', error);
+        } finally {
+          setIsSaving(false);
+        }
+      };
+
+      // Debounce saves
+      const timeoutId = setTimeout(saveBoard, 1000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [elements, boardId, user, isSaving]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -144,6 +191,14 @@ export const DrawingCanvas = () => {
       {/* Centered floating toolbar */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-2 flex items-center space-x-1">
+          {/* Saving indicator */}
+          {isSaving && (
+            <div className="px-3 py-2 text-sm text-gray-600 flex items-center space-x-2">
+              <div className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full"></div>
+              <span>Saving...</span>
+            </div>
+          )}
+          
           {/* Drawing Tools */}
           <div className="flex space-x-1">
             <button
