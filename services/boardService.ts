@@ -295,35 +295,82 @@ class BoardService {
   }
 }
 
-// Test Firestore connection
-export const testFirestoreConnection = async (): Promise<{ success: boolean; error?: string }> => {
+// Test Firestore connection with detailed diagnostics
+export const testFirestoreConnection = async (): Promise<{ success: boolean; error?: string; details?: any }> => {
   try {
+    console.log('🔍 Starting Firestore connection test...');
     const db = getFirestoreDb();
     
-    // Try to create a test collection reference
+    // Test 1: Basic connection
+    console.log('📡 Testing basic Firestore connection...');
     const testCollection = collection(db, 'connection-test');
     
-    // Try to add a test document
+    // Test 2: Write operation
+    console.log('✍️ Testing write operation...');
     const testDoc = await addDoc(testCollection, {
       test: true,
-      timestamp: serverTimestamp()
+      timestamp: serverTimestamp(),
+      userAgent: navigator.userAgent,
+      testType: 'connection-diagnostic'
     });
+    console.log('✅ Write operation successful, doc ID:', testDoc.id);
     
-    // Try to read the document back
+    // Test 3: Read operation
+    console.log('📖 Testing read operation...');
     const docSnap = await getDoc(testDoc);
     
     if (docSnap.exists()) {
-      // Clean up test document
+      console.log('✅ Read operation successful, data:', docSnap.data());
+      
+      // Test 4: Clean up
+      console.log('🧹 Cleaning up test document...');
       await deleteDoc(testDoc);
-      return { success: true };
+      console.log('✅ Cleanup successful');
+      
+      return { 
+        success: true, 
+        details: {
+          documentId: testDoc.id,
+          writeTimestamp: docSnap.data().timestamp,
+          readSuccess: true,
+          cleanupSuccess: true
+        }
+      };
     } else {
-      return { success: false, error: 'Document was not created properly' };
+      return { 
+        success: false, 
+        error: 'Document was not created properly',
+        details: { documentId: testDoc.id }
+      };
     }
   } catch (error: any) {
-    console.error('Firestore connection test failed:', error);
+    console.error('❌ Firestore connection test failed:', error);
+    
+    let errorMessage = `${error.code || 'unknown'}: ${error.message}`;
+    let suggestions = [];
+    
+    // Provide specific suggestions based on error type
+    if (error.code === 'permission-denied') {
+      suggestions.push('Update Firestore security rules');
+      suggestions.push('Ensure user is authenticated');
+    } else if (error.code === 'unavailable') {
+      suggestions.push('Check if Firestore database is created');
+      suggestions.push('Verify internet connection');
+    } else if (error.code === 'unauthenticated') {
+      suggestions.push('Sign in with Google first');
+    } else if (error.message?.includes('Failed to get document')) {
+      suggestions.push('Firestore database may not be initialized');
+      suggestions.push('Check Firebase Console');
+    }
+    
     return { 
       success: false, 
-      error: `${error.code || 'unknown'}: ${error.message}` 
+      error: errorMessage,
+      details: {
+        errorCode: error.code,
+        suggestions,
+        stack: error.stack
+      }
     };
   }
 };

@@ -12,7 +12,8 @@ export const Dashboard = () => {
   const [newBoardDescription, setNewBoardDescription] = useState('');
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [connectionTest, setConnectionTest] = useState<{ success: boolean; error?: string } | null>(null);
+  const [connectionTest, setConnectionTest] = useState<{ success: boolean; error?: string; details?: any } | null>(null);
+  const [testing, setTesting] = useState(false);
 
   // Load user's boards on component mount
   useEffect(() => {
@@ -67,10 +68,33 @@ export const Dashboard = () => {
   };
 
   const handleTestConnection = async () => {
-    console.log('Testing Firestore connection...');
-    const result = await testFirestoreConnection();
-    setConnectionTest(result);
-    console.log('Connection test result:', result);
+    if (!user) {
+      setConnectionTest({ 
+        success: false, 
+        error: 'Please sign in first',
+        details: { suggestion: 'Authentication required for Firestore access' }
+      });
+      return;
+    }
+
+    setTesting(true);
+    setConnectionTest(null);
+    console.log('🔄 Testing Firestore connection...');
+    
+    try {
+      const result = await testFirestoreConnection();
+      setConnectionTest(result);
+      console.log('📊 Connection test result:', result);
+    } catch (error) {
+      console.error('❌ Test function failed:', error);
+      setConnectionTest({
+        success: false,
+        error: 'Test function failed to execute',
+        details: { error: error.message }
+      });
+    } finally {
+      setTesting(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -126,9 +150,21 @@ export const Dashboard = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={handleTestConnection}
-                className="text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-md hover:bg-yellow-200"
+                disabled={testing}
+                className={`text-sm px-3 py-1 rounded-md transition-colors ${
+                  testing 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                }`}
               >
-                Test DB Connection
+                {testing ? (
+                  <span className="flex items-center space-x-2">
+                    <div className="animate-spin w-3 h-3 border border-yellow-600 border-t-transparent rounded-full"></div>
+                    <span>Testing...</span>
+                  </span>
+                ) : (
+                  'Test DB Connection'
+                )}
               </button>
               <img
                 src={user?.photoURL || ''}
@@ -149,30 +185,61 @@ export const Dashboard = () => {
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Connection Test Results */}
         {connectionTest && (
-          <div className={`mb-6 p-4 rounded-md ${
+          <div className={`mb-6 p-4 rounded-lg border-2 ${
             connectionTest.success 
-              ? 'bg-green-50 border border-green-200' 
-              : 'bg-red-50 border border-red-200'
+              ? 'bg-green-50 border-green-200' 
+              : 'bg-red-50 border-red-200'
           }`}>
-            <div className="flex items-center">
-              <div className={`flex-shrink-0 ${
-                connectionTest.success ? 'text-green-400' : 'text-red-400'
+            <div className="flex items-start">
+              <div className={`flex-shrink-0 text-xl ${
+                connectionTest.success ? 'text-green-500' : 'text-red-500'
               }`}>
                 {connectionTest.success ? '✅' : '❌'}
               </div>
-              <div className="ml-3">
-                <h3 className={`text-sm font-medium ${
+              <div className="ml-3 flex-1">
+                <h3 className={`text-sm font-semibold ${
                   connectionTest.success ? 'text-green-800' : 'text-red-800'
                 }`}>
-                  {connectionTest.success ? 'Firestore Connection Successful' : 'Firestore Connection Failed'}
+                  {connectionTest.success ? '🎉 Firestore Connection Successful!' : '⚠️ Firestore Connection Failed'}
                 </h3>
-                {connectionTest.error && (
-                  <div className={`mt-2 text-sm ${
-                    connectionTest.success ? 'text-green-700' : 'text-red-700'
-                  }`}>
-                    Error: {connectionTest.error}
+                
+                {connectionTest.success && connectionTest.details && (
+                  <div className="mt-2 text-sm text-green-700">
+                    <p>✓ Database write successful</p>
+                    <p>✓ Database read successful</p>
+                    <p>✓ Data cleanup successful</p>
+                    <p className="text-xs mt-1 text-green-600">
+                      Document ID: {connectionTest.details.documentId}
+                    </p>
                   </div>
                 )}
+                
+                {connectionTest.error && (
+                  <div className="mt-2">
+                    <p className="text-sm font-medium text-red-700">Error Details:</p>
+                    <p className="text-sm text-red-600 bg-red-100 p-2 rounded mt-1 font-mono">
+                      {connectionTest.error}
+                    </p>
+                    
+                    {connectionTest.details?.suggestions && (
+                      <div className="mt-3">
+                        <p className="text-sm font-medium text-red-700">Suggested Solutions:</p>
+                        <ul className="list-disc list-inside text-sm text-red-600 mt-1">
+                          {connectionTest.details.suggestions.map((suggestion: string, index: number) => (
+                            <li key={index}>{suggestion}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <button
+                  onClick={() => setConnectionTest(null)}
+                  className="mt-3 text-xs text-gray-500 hover:text-gray-700 underline"
+                >
+                  Dismiss
+                </button>
               </div>
             </div>
           </div>

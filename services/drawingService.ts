@@ -1,27 +1,46 @@
 import { RoughCanvas } from 'roughjs/bin/canvas';
 import { SketchElement, Tool, Point, Position } from '../types';
+import { createDefaultElement } from './elementDefaults';
 
-export const createElement = (id: number, x1: number, y1: number, x2: number, y2: number, tool: Tool): SketchElement | null => {
-  let baseElement = { id, x1, y1, x2, y2 };
-  switch (tool) {
-    case Tool.RECTANGLE:
-      return { ...baseElement, type: Tool.RECTANGLE };
-    case Tool.ELLIPSE:
-      return { ...baseElement, type: Tool.ELLIPSE };
-    case Tool.LINE:
-      return { ...baseElement, type: Tool.LINE };
-    case Tool.ARROW:
-      return { ...baseElement, type: Tool.ARROW };
-    case Tool.PENCIL:
-      return { ...baseElement, type: Tool.PENCIL, points: [{ x: x1, y: y1 }] };
-    case Tool.TEXT:
-      return { ...baseElement, type: Tool.TEXT, text: '', fontSize: 24 };
-    default:
-      return null;
+export const createElement = (
+  id: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  tool: Tool,
+  settings?: {
+    strokeColor?: string;
+    fillColor?: string;
+    strokeWidth?: number;
+    opacity?: number;
   }
+): SketchElement | null => {
+  const base = createDefaultElement(tool, x1, y1, x2, y2);
+  
+  if (!base) return null;
+  
+  const element = {
+    ...base,
+    id,
+    x1,
+    y1,
+    x2,
+    y2,
+  } as SketchElement;
+  
+  // Apply any custom settings
+  if (settings) {
+    if (settings.strokeColor) element.strokeColor = settings.strokeColor;
+    if (settings.fillColor) element.fillColor = settings.fillColor;
+    if (settings.strokeWidth) element.strokeWidth = settings.strokeWidth;
+    if (settings.opacity !== undefined) element.opacity = settings.opacity;
+  }
+  
+  return element;
 };
 
-const drawArrow = (roughCanvas: RoughCanvas, x1: number, y1: number, x2: number, y2: number, seed: number) => {
+const drawArrow = (roughCanvas: RoughCanvas, x1: number, y1: number, x2: number, y2: number, seed: number, options?: any) => {
     const arrowLength = 20;
     const angle = Math.atan2(y2 - y1, x2 - x1);
     const x3 = x2 - arrowLength * Math.cos(angle - Math.PI / 6);
@@ -29,17 +48,29 @@ const drawArrow = (roughCanvas: RoughCanvas, x1: number, y1: number, x2: number,
     const x4 = x2 - arrowLength * Math.cos(angle + Math.PI / 6);
     const y4 = y2 - arrowLength * Math.sin(angle + Math.PI / 6);
     
-    const options = { seed };
+    const arrowOptions = options || { seed };
 
-    roughCanvas.line(x1, y1, x2, y2, options);
-    roughCanvas.line(x2, y2, x3, y3, options);
-    roughCanvas.line(x2, y2, x4, y4, options);
+    roughCanvas.line(x1, y1, x2, y2, arrowOptions);
+    roughCanvas.line(x2, y2, x3, y3, arrowOptions);
+    roughCanvas.line(x2, y2, x4, y4, arrowOptions);
 }
 
 export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: SketchElement) => {
   const { id } = element;
   // Use the element's unique ID as a seed to prevent vibration
-  const options = { seed: id };
+  const options = { 
+    seed: id,
+    stroke: element.strokeColor || '#000000',
+    strokeWidth: element.strokeWidth || 2,
+    fill: element.fillColor && element.fillColor !== 'transparent' ? element.fillColor : undefined,
+    fillStyle: 'solid',
+  };
+  
+  // Apply opacity
+  if (element.opacity !== undefined && element.opacity < 1) {
+    context.save();
+    context.globalAlpha = element.opacity;
+  }
   
   switch (element.type) {
     case Tool.RECTANGLE:
@@ -48,11 +79,22 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
     case Tool.ELLIPSE:
       roughCanvas.ellipse(element.x1 + (element.x2 - element.x1) / 2, element.y1 + (element.y2 - element.y1) / 2, element.x2 - element.x1, element.y2 - element.y1, options);
       break;
+    case Tool.DIAMOND: {
+      const centerX = (element.x1 + element.x2) / 2;
+      const centerY = (element.y1 + element.y2) / 2;
+      roughCanvas.polygon([
+        [centerX, element.y1],           // Top
+        [element.x2, centerY],           // Right
+        [centerX, element.y2],           // Bottom
+        [element.x1, centerY],           // Left
+      ], options);
+      break;
+    }
     case Tool.LINE:
       roughCanvas.line(element.x1, element.y1, element.x2, element.y2, options);
       break;
     case Tool.ARROW:
-      drawArrow(roughCanvas, element.x1, element.y1, element.x2, element.y2, id);
+      drawArrow(roughCanvas, element.x1, element.y1, element.x2, element.y2, id, options);
       break;
     case Tool.PENCIL:
       if (element.points && element.points.length > 0) {
@@ -62,15 +104,16 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
     case Tool.TEXT:
        if (element.text) {
         context.textBaseline = 'top';
-        context.fillStyle = '#000';
-        context.font = `${element.fontSize}px Virgil`;
+        context.fillStyle = element.strokeColor || '#000';
+        context.font = `${element.fontSize || 24}px Virgil`;
         context.fillText(element.text, element.x1, element.y1);
        }
       break;
-    default:
-      // This should never happen for BaseElement types
-      const exhaustiveCheck: never = element;
-      throw new Error(`Type not recognised: ${exhaustiveCheck}`);
+  }
+  
+  // Restore opacity
+  if (element.opacity !== undefined && element.opacity < 1) {
+    context.restore();
   }
 };
 
@@ -170,6 +213,99 @@ export const getElementAtPosition = (x: number, y: number, elements: readonly Sk
         .find(element => isPointNearElement(x, y, element).position !== null);
 };
 
+export const getElementsInSelectionBox = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  elements: readonly SketchElement[]
+): SketchElement[] => {
+  const minX = Math.min(x1, x2);
+  const maxX = Math.max(x1, x2);
+  const minY = Math.min(y1, y2);
+  const maxY = Math.max(y1, y2);
+
+  return elements.filter(element => {
+    const [elMinX, elMinY, elMaxX, elMaxY] = getResizedCoordinates(element);
+    return elMinX >= minX && elMaxX <= maxX && elMinY >= minY && elMaxY <= maxY;
+  });
+};
+
+export const drawSelectionBox = (
+  ctx: CanvasRenderingContext2D,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+) => {
+  ctx.save();
+  ctx.strokeStyle = '#3b82f6';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.strokeRect(
+    Math.min(x1, x2),
+    Math.min(y1, y2),
+    Math.abs(x2 - x1),
+    Math.abs(y2 - y1)
+  );
+  ctx.restore();
+};
+
+export const drawSelectionBounds = (
+  ctx: CanvasRenderingContext2D,
+  element: SketchElement,
+  showHandles = true
+) => {
+  const [minX, minY, maxX, maxY] = getResizedCoordinates(element);
+  const width = maxX - minX;
+  const height = maxY - minY;
+
+  ctx.save();
+  
+  // Selection border
+  ctx.strokeStyle = '#3b82f6';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  ctx.strokeRect(minX, minY, width, height);
+  
+  if (showHandles) {
+    // Resize handles
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    
+    const handleSize = 8;
+    const handles = [
+      { x: minX, y: minY }, // top-left
+      { x: maxX, y: minY }, // top-right
+      { x: minX, y: maxY }, // bottom-left
+      { x: maxX, y: maxY }, // bottom-right
+      { x: minX + width / 2, y: minY }, // top-middle
+      { x: minX + width / 2, y: maxY }, // bottom-middle
+      { x: minX, y: minY + height / 2 }, // left-middle
+      { x: maxX, y: minY + height / 2 }, // right-middle
+    ];
+    
+    handles.forEach(handle => {
+      ctx.fillRect(
+        handle.x - handleSize / 2,
+        handle.y - handleSize / 2,
+        handleSize,
+        handleSize
+      );
+      ctx.strokeRect(
+        handle.x - handleSize / 2,
+        handle.y - handleSize / 2,
+        handleSize,
+        handleSize
+      );
+    });
+  }
+  
+  ctx.restore();
+};
+
 export const getCursorForPosition = (position: Position | null): string => {
     switch (position) {
         case "tl":
@@ -202,4 +338,25 @@ export const resizeElement = (x: number, y: number, position: Position, element:
         default:
             return null;
     }
+};
+
+export const moveElement = (element: SketchElement, offsetX: number, offsetY: number): SketchElement => {
+  if (element.type === Tool.PENCIL && element.points) {
+    return {
+      ...element,
+      x1: element.x1 + offsetX,
+      y1: element.y1 + offsetY,
+      x2: element.x2 + offsetX,
+      y2: element.y2 + offsetY,
+      points: element.points.map(p => ({ x: p.x + offsetX, y: p.y + offsetY })),
+    };
+  }
+  
+  return {
+    ...element,
+    x1: element.x1 + offsetX,
+    y1: element.y1 + offsetY,
+    x2: element.x2 + offsetX,
+    y2: element.y2 + offsetY,
+  };
 };
