@@ -1,0 +1,697 @@
+/* ─── Drewit Excalidraw-inspired UI Styles ────────────────────────── */
+/* Clean, minimal, professional drawing app theme */
+
+/* ─── Design Tokens ──────────────────────────────────────────────── */
+:root {
+  --drewit-bg: #ffffff;
+  --drewit-surface: #ffffff;
+  --drewit-border: #e0e0e0;
+  --drewit-text: #1b1b1f;
+  --drewit-text-secondary: #6b6b76;
+  --drewit-primary: #6965db;
+  --drewit-primary-light: #e8e7fd;
+  --drewit-danger: #e03131;
+  --drewit-radius: 8px;
+  --drewit-radius-sm: 6px;
+  --drewit-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  --drewit-shadow-lg: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
+  --drewit-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --drewit-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+}
+
+/* ─── Canvas Container ───────────────────────────────────────────── */
+.drewit-canvas-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: var(--drewit-bg);
+  overflow: hidden;
+  font-family: var(--drewit-font);
+}
+
+.drewit-canvas-container canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Static canvas below interactive */
+.drewit-canvas-static {
+  z-index: 1;
+}
+
+.drewit-canvas-interactive {
+  z-index: 2;
+}
+
+/* ─── Panel Base ─────────────────────────────────────────────────── */
+.drewit-panel {
+  background: var(--drewit-surface);
+  border-radius: var(--drewit-radius);
+  box-shadow: var(--drewit-shadow);
+  padding: 6px;
+  pointer-events: auto;
+}
+
+.drewit-panel-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* ─── Positioned Containers ──────────────────────────────────────── */
+.drewit-top-left {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.drewit-top-center {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.drewit-top-right {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.drewit-bottom-left {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.drewit-bottom-right {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────── */
+.drewit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: var(--drewit-radius-sm);
+  color: var(--drewit-text);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  padding: 0;
+  pointer-events: auto;
+}
+
+.drewit-btn:hover {
+  background: #f0f0f4;
+}
+
+.drewit-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.drewit-btn:disabled:hover {
+  background: transparent;
+}
+
+.drewit-btn.drewit-sm {
+  width: 30px;
+  height: 30px;
+}
+
+.drewit-btn-active {
+  background: var(--drewit-primary-light) !important;
+  color: var(--drewit-primary) !important;
+}
+
+.drewit-btn-danger:hover {
+  background: #ffeaea !important;
+  color: var(--drewit-danger) !important;
+}
+
+/* ─── Menu Button ────────────────────────────────────────────────── */
+.drewit-menu-btn {
+  width: 36px;
+}
+
+.drewit-project-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--drewit-text);
+  padding: 0 8px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Tool Palette ───────────────────────────────────────────────── */
+.drewit-tool-palette {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  pointer-events: auto;
+}
+
+.drewit-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: var(--drewit-radius-sm);
+  color: var(--drewit-text-secondary);
+  cursor: pointer;
+  transition: all 0.12s;
+  padding: 0;
+}
+
+.drewit-tool-btn:hover {
+  background: #f0f0f4;
+  color: var(--drewit-text);
+}
+
+.drewit-tool-btn.drewit-tool-active {
+  background: var(--drewit-primary);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(105, 101, 219, 0.3);
+}
+
+/* ─── Separator ──────────────────────────────────────────────────── */
+.drewit-separator {
+  width: 1px;
+  height: 20px;
+  background: var(--drewit-border);
+  margin: 0 4px;
+}
+
+/* ─── Save Indicator ─────────────────────────────────────────────── */
+.drewit-save-indicator {
+  font-size: 12px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+}
+
+.drewit-save-saved { color: #2f9e44; }
+.drewit-save-saving { color: var(--drewit-primary); }
+.drewit-save-error { color: var(--drewit-danger); }
+
+@keyframes drewit-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.drewit-spin {
+  display: inline-block;
+  animation: drewit-spin 1s linear infinite;
+}
+
+/* ─── Dropdown Menu ──────────────────────────────────────────────── */
+.drewit-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 220px;
+  background: var(--drewit-surface);
+  border-radius: var(--drewit-radius);
+  box-shadow: var(--drewit-shadow-lg);
+  padding: 4px;
+  z-index: 200;
+  pointer-events: auto;
+}
+
+.drewit-menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--drewit-radius-sm);
+  cursor: pointer;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--drewit-text);
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.drewit-menu-item:hover {
+  background: #f0f0f4;
+}
+
+.drewit-menu-danger:hover {
+  background: #ffeaea !important;
+  color: var(--drewit-danger) !important;
+}
+
+.drewit-menu-icon {
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.drewit-menu-label {
+  flex: 1;
+}
+
+.drewit-menu-shortcut {
+  font-size: 11px;
+  color: var(--drewit-text-secondary);
+  font-family: var(--drewit-mono);
+}
+
+.drewit-menu-separator {
+  height: 1px;
+  background: var(--drewit-border);
+  margin: 4px 8px;
+}
+
+/* ─── Zoom Bar ───────────────────────────────────────────────────── */
+.drewit-zoom-bar {
+  padding: 2px 4px;
+}
+
+.drewit-zoom-value {
+  font-size: 12px;
+  font-family: var(--drewit-mono);
+  color: var(--drewit-text);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--drewit-radius-sm);
+  min-width: 50px;
+  text-align: center;
+  transition: background 0.15s;
+}
+
+.drewit-zoom-value:hover {
+  background: #f0f0f4;
+}
+
+/* ─── Selection Bar ──────────────────────────────────────────────── */
+.drewit-selection-bar {
+  padding: 4px 8px;
+}
+
+.drewit-selection-count {
+  font-size: 12px;
+  color: var(--drewit-text-secondary);
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+/* ─── Properties Panel ───────────────────────────────────────────── */
+.drewit-properties {
+  position: absolute;
+  left: 12px;
+  top: 60px;
+  width: 232px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  background: var(--drewit-surface);
+  border-radius: var(--drewit-radius);
+  box-shadow: var(--drewit-shadow);
+  padding: 12px;
+  z-index: 90;
+  pointer-events: auto;
+}
+
+/* Scrollbar styling */
+.drewit-properties::-webkit-scrollbar {
+  width: 4px;
+}
+
+.drewit-properties::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  border-radius: 2px;
+}
+
+.drewit-prop-section {
+  margin-bottom: 12px;
+}
+
+.drewit-prop-section:last-child {
+  margin-bottom: 0;
+}
+
+.drewit-prop-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--drewit-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.drewit-prop-sublabel {
+  font-size: 11px;
+  color: var(--drewit-text-secondary);
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* ─── Color Grid ─────────────────────────────────────────────────── */
+.drewit-color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.drewit-color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.1s, transform 0.1s;
+  padding: 0;
+}
+
+.drewit-color-swatch:hover {
+  transform: scale(1.15);
+}
+
+.drewit-color-swatch.active {
+  border-color: var(--drewit-primary);
+  box-shadow: 0 0 0 2px var(--drewit-primary-light);
+}
+
+.drewit-color-custom {
+  width: 24px;
+  height: 24px;
+  border: 2px dashed var(--drewit-border);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  background: transparent;
+}
+
+.drewit-color-custom::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.drewit-color-custom::-webkit-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+
+/* ─── Property Button Group ──────────────────────────────────────── */
+.drewit-prop-btn-group {
+  display: flex;
+  gap: 4px;
+}
+
+.drewit-prop-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 32px;
+  border: 1.5px solid var(--drewit-border);
+  background: var(--drewit-surface);
+  border-radius: var(--drewit-radius-sm);
+  cursor: pointer;
+  color: var(--drewit-text-secondary);
+  transition: all 0.12s;
+  padding: 0 6px;
+}
+
+.drewit-prop-btn:hover {
+  border-color: #c0c0c8;
+  color: var(--drewit-text);
+}
+
+.drewit-prop-btn.active {
+  border-color: var(--drewit-primary);
+  background: var(--drewit-primary-light);
+  color: var(--drewit-primary);
+}
+
+.drewit-prop-btn-label {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.drewit-prop-btn-full {
+  width: 100%;
+  height: 30px;
+  border: 1.5px solid var(--drewit-border);
+  background: var(--drewit-surface);
+  border-radius: var(--drewit-radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--drewit-text-secondary);
+  transition: all 0.12s;
+}
+
+.drewit-prop-btn-full:hover {
+  background: #f0f0f4;
+  color: var(--drewit-text);
+}
+
+/* ─── Slider ─────────────────────────────────────────────────────── */
+.drewit-slider {
+  width: 100%;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e0e0e0;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.drewit-slider:focus-visible {
+  outline: 2px solid var(--drewit-primary);
+  outline-offset: 2px;
+}
+
+.drewit-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--drewit-primary);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.drewit-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--drewit-primary);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* ─── Select ─────────────────────────────────────────────────────── */
+.drewit-select {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1.5px solid var(--drewit-border);
+  border-radius: var(--drewit-radius-sm);
+  font-size: 12px;
+  background: var(--drewit-surface);
+  color: var(--drewit-text);
+  cursor: pointer;
+  outline: none;
+}
+
+.drewit-select:focus {
+  border-color: var(--drewit-primary);
+}
+
+/* ─── Arrowhead Picker ───────────────────────────────────────────── */
+.drewit-arrowhead-picker {
+  flex: 1;
+}
+
+.drewit-prop-row {
+  display: flex;
+  gap: 8px;
+}
+
+/* ─── Lock ───────────────────────────────────────────────────────── */
+.drewit-lock-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--drewit-text-secondary);
+  cursor: pointer;
+}
+
+.drewit-lock-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: var(--drewit-primary);
+}
+
+/* ─── Welcome Screen ─────────────────────────────────────────────── */
+.drewit-welcome {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.drewit-welcome h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--drewit-text);
+  margin: 0 0 12px;
+  opacity: 0.6;
+}
+
+.drewit-welcome p {
+  font-size: 14px;
+  color: var(--drewit-text-secondary);
+  margin: 4px 0;
+  opacity: 0.5;
+}
+
+/* ─── Context Menu ───────────────────────────────────────────────── */
+.drewit-context-menu {
+  position: fixed;
+  min-width: 200px;
+  background: var(--drewit-surface);
+  border-radius: var(--drewit-radius);
+  box-shadow: var(--drewit-shadow-lg);
+  padding: 4px;
+  z-index: 9999;
+}
+
+.drewit-context-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 7px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--drewit-text);
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.drewit-context-item:hover {
+  background: #f0f0f4;
+}
+
+.drewit-context-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.drewit-context-separator {
+  height: 1px;
+  background: var(--drewit-border);
+  margin: 3px 8px;
+}
+
+/* ─── Toast Notifications ────────────────────────────────────────── */
+.drewit-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--drewit-text);
+  color: white;
+  padding: 10px 20px;
+  border-radius: var(--drewit-radius);
+  font-size: 13px;
+  box-shadow: var(--drewit-shadow-lg);
+  z-index: 10000;
+  animation: drewit-toast-in 0.3s ease;
+}
+
+@keyframes drewit-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .drewit-tool-palette {
+    gap: 1px;
+    padding: 3px;
+  }
+
+  .drewit-tool-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .drewit-properties {
+    width: 200px;
+    left: 8px;
+    top: 56px;
+    padding: 8px;
+  }
+
+  .drewit-project-name {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .drewit-top-right {
+    display: none;
+  }
+
+  .drewit-tool-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .drewit-properties {
+    position: fixed;
+    bottom: 60px;
+    left: 8px;
+    right: 8px;
+    top: auto;
+    width: auto;
+    max-height: 40vh;
+  }
+}

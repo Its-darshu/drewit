@@ -50,7 +50,7 @@ export const createDefaultElement = (
       return {
         ...baseElement,
         type: Tool.PENCIL,
-        points: [{ x: 0, y: 0 }],
+        points: [],  // Will be initialized with actual starting point in DrawingCanvas
         lastCommittedPoint: null,
         simulatePressure: false,
       };
@@ -74,7 +74,7 @@ export const createDefaultElement = (
       return {
         ...baseElement,
         type: Tool.ARROW,
-        points: [{ x: 0, y: 0 }],
+        points: [],  // Will be set when drawing begins
         lastCommittedPoint: null,
         startBinding: null,
         endBinding: null,

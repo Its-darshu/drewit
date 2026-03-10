@@ -64,12 +64,30 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
     strokeWidth: element.strokeWidth || 2,
     fill: element.fillColor && element.fillColor !== 'transparent' ? element.fillColor : undefined,
     fillStyle: 'solid',
+    roughness: element.roughness ?? 1,
   };
   
   // Apply opacity
+  context.save();
   if (element.opacity !== undefined && element.opacity < 1) {
-    context.save();
     context.globalAlpha = element.opacity;
+  }
+
+  // Apply stroke style
+  if (element.strokeStyle === 'dashed') {
+    context.setLineDash([8, 4]);
+  } else if (element.strokeStyle === 'dotted') {
+    context.setLineDash([2, 4]);
+  }
+
+  // Apply rotation
+  const angle = element.angle || 0;
+  if (angle !== 0) {
+    const cx = (element.x1 + element.x2) / 2;
+    const cy = (element.y1 + element.y2) / 2;
+    context.translate(cx, cy);
+    context.rotate(angle);
+    context.translate(-cx, -cy);
   }
   
   switch (element.type) {
@@ -111,10 +129,8 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       break;
   }
   
-  // Restore opacity
-  if (element.opacity !== undefined && element.opacity < 1) {
-    context.restore();
-  }
+  // Restore all state (opacity + rotation + line dash)
+  context.restore();
 };
 
 export const getResizedCoordinates = (element: SketchElement): [number, number, number, number] => {
