@@ -15,7 +15,7 @@
  *  - Properties panel for element editing
  */
 
-import React, { useRef, useEffect, useLayoutEffect, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { SketchElement, Tool, Action, Position, PencilElement, Point } from '../types';
 import {
   drawElement,
@@ -263,6 +263,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
 
   useLayoutEffect(() => {
     if (!editingText) return;
+    // Ensure focus is applied before paint so the first keystroke is captured reliably.
     textInputRef.current?.focus();
   }, [editingText]);
 
