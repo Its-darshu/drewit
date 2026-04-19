@@ -113,6 +113,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
   const [clipboard, setClipboard] = useState<SketchElement[]>([]);
   const [selectionBox, setSelectionBox] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const [dragPreviewOffset, setDragPreviewOffset] = useState<Point | null>(null);
+  const [drawPreviewPoint, setDrawPreviewPoint] = useState<Point | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [resizeTick, setResizeTick] = useState(0);
 
@@ -146,6 +147,14 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
     const rect = canvas.getBoundingClientRect();
     return screenToCanvas(e.clientX - rect.left, e.clientY - rect.top);
   }, [screenToCanvas]);
+
+  const isShapeDrawingTool = useCallback((activeTool: Tool) => (
+    activeTool === Tool.RECTANGLE
+    || activeTool === Tool.ELLIPSE
+    || activeTool === Tool.DIAMOND
+    || activeTool === Tool.LINE
+    || activeTool === Tool.ARROW
+  ), []);
 
   // ─── Load / Save ────────────────────────────────────────────────
 
@@ -467,8 +476,11 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       }
     } else {
       setAction(Action.DRAWING);
+      if (isShapeDrawingTool(tool)) {
+        setDrawPreviewPoint(point);
+      }
     }
-  }, [elements, selectedElementIds, tool, spacePressed, panOffset, zoom, settings, contextMenu, getMousePos, canvasToScreen]);
+  }, [elements, selectedElementIds, tool, spacePressed, panOffset, zoom, settings, contextMenu, getMousePos, canvasToScreen, isShapeDrawingTool]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = interactiveCanvasRef.current;
@@ -613,8 +625,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
         const target = getBindingTarget(point.x, point.y, elements);
         setBindingTarget(target);
       }
+
+      if (isShapeDrawingTool(tool)) {
+        setDrawPreviewPoint(point);
+      }
     }
-  }, [elements, selectedElementIds, tool, action, startPoint, isPanning, panStart, resizeInfo, rotationInfo, selectionBox, zoom, getMousePos]);
+  }, [elements, selectedElementIds, tool, action, startPoint, isPanning, panStart, resizeInfo, rotationInfo, selectionBox, zoom, getMousePos, isShapeDrawingTool]);
 
   const handleMouseUp = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     // Stop panning
@@ -674,6 +690,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
     setResizeInfo(null);
     setRotationInfo(null);
     setDragPreviewOffset(null);
+    setDrawPreviewPoint(null);
     setSnapLines([]);
   }, [elements, action, tool, startPoint, selectionBox, isPanning, settings, getMousePos]);
 
@@ -868,6 +885,29 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
 
   const selectedElements = elements.filter(el => selectedElementIds.includes(el.id));
 
+  const drawPreviewMetrics =
+    action === Action.DRAWING
+    && startPoint
+    && drawPreviewPoint
+    && isShapeDrawingTool(tool)
+      ? {
+          minX: Math.min(startPoint.x, drawPreviewPoint.x),
+          minY: Math.min(startPoint.y, drawPreviewPoint.y),
+          maxX: Math.max(startPoint.x, drawPreviewPoint.x),
+          maxY: Math.max(startPoint.y, drawPreviewPoint.y),
+          width: Math.abs(drawPreviewPoint.x - startPoint.x),
+          height: Math.abs(drawPreviewPoint.y - startPoint.y),
+        }
+      : null;
+
+  const drawPreviewScreen = drawPreviewMetrics
+    ? {
+        topLeft: canvasToScreen(drawPreviewMetrics.minX, drawPreviewMetrics.minY),
+        width: drawPreviewMetrics.width * zoom,
+        height: drawPreviewMetrics.height * zoom,
+      }
+    : null;
+
   // ─── Render ─────────────────────────────────────────────────────
 
   return (
@@ -950,6 +990,30 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
           onClose={() => setContextMenu(null)}
           items={contextMenuItems}
         />
+      )}
+
+      {/* Live drawing preview with position and size */}
+      {drawPreviewMetrics && drawPreviewScreen && (
+        <>
+          <div
+            className="drewit-draw-preview-box"
+            style={{
+              left: `${drawPreviewScreen.topLeft.x}px`,
+              top: `${drawPreviewScreen.topLeft.y}px`,
+              width: `${Math.max(drawPreviewScreen.width, 1)}px`,
+              height: `${Math.max(drawPreviewScreen.height, 1)}px`,
+            }}
+          />
+          <div
+            className="drewit-draw-preview-metrics"
+            style={{
+              left: `${drawPreviewScreen.topLeft.x + 8}px`,
+              top: `${drawPreviewScreen.topLeft.y - 36}px`,
+            }}
+          >
+            {`x: ${Math.round(drawPreviewMetrics.minX)} y: ${Math.round(drawPreviewMetrics.minY)} | w: ${Math.round(drawPreviewMetrics.width)} h: ${Math.round(drawPreviewMetrics.height)}`}
+          </div>
+        </>
       )}
 
       {/* Text editing textarea */}

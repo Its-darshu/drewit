@@ -46,6 +46,29 @@
   z-index: 2;
 }
 
+/* ─── Live Draw Preview ─────────────────────────────────────────── */
+.drewit-draw-preview-box {
+  position: absolute;
+  z-index: 110;
+  border: 1px dashed rgba(38, 132, 255, 0.95);
+  background: rgba(38, 132, 255, 0.08);
+  pointer-events: none;
+}
+
+.drewit-draw-preview-metrics {
+  position: absolute;
+  z-index: 111;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(17, 24, 39, 0.9);
+  color: #f9fafb;
+  font-size: 11px;
+  line-height: 1;
+  font-family: var(--drewit-mono);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* ─── Panel Base ─────────────────────────────────────────────────── */
 .drewit-panel {
   background: var(--drewit-surface);
