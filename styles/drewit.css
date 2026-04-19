@@ -46,6 +46,10 @@
   z-index: 2;
 }
 
+.drewit-text-editor {
+  background: rgba(255, 255, 255, 1);
+}
+
 /* ─── Live Draw Preview ─────────────────────────────────────────── */
 .drewit-draw-preview-box {
   position: absolute;
