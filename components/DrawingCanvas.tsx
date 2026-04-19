@@ -875,8 +875,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
     if (text) {
       const newEl = createElement(editingText.id, editingText.x, editingText.y, editingText.x + 200, editingText.y + 30, Tool.TEXT, settings);
       if (newEl && newEl.type === Tool.TEXT) {
-        (newEl as any).text = text;
-        (newEl as any).originalText = text;
+        newEl.text = text;
+        newEl.originalText = text;
         setElements([...elements, newEl]);
       }
     }

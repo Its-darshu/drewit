@@ -123,7 +123,7 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
        if (element.text) {
         context.textBaseline = 'top';
         context.fillStyle = element.strokeColor || '#000';
-        context.font = `${element.fontSize || 24}px Virgil`;
+        context.font = `${element.fontSize || 24}px "Virgil", sans-serif`;
         context.fillText(element.text, element.x1, element.y1);
        }
       break;

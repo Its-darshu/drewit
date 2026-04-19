@@ -23,7 +23,7 @@
 .drewit-canvas-container {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   background: var(--drewit-bg);
   overflow: hidden;
   font-family: var(--drewit-font);
