@@ -128,17 +128,13 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
 
   // Text editing
   const [editingText, setEditingText] = useState<{ id: number; x: number; y: number } | null>(null);
+  const [textDraft, setTextDraft] = useState('');
 
   // ─── Coordinate Transforms ──────────────────────────────────────
 
   const screenToCanvas = useCallback((screenX: number, screenY: number): Point => ({
     x: (screenX - panOffset.x) / zoom,
     y: (screenY - panOffset.y) / zoom,
-  }), [panOffset, zoom]);
-
-  const canvasToScreen = useCallback((canvasX: number, canvasY: number): Point => ({
-    x: canvasX * zoom + panOffset.x,
-    y: canvasY * zoom + panOffset.y,
   }), [panOffset, zoom]);
 
   const getMousePos = useCallback((e: React.MouseEvent<HTMLCanvasElement>): Point => {
@@ -265,6 +261,14 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    if (!editingText) return;
+    const timeoutId = window.setTimeout(() => {
+      textInputRef.current?.focus();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [editingText]);
+
   // ─── Zoom Functions ─────────────────────────────────────────────
 
   const handleZoomIn = useCallback(() => {
@@ -310,7 +314,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       const target = e.target as HTMLElement;
 
       // Ignore when typing
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable || editingText) return;
 
       // Spacebar pan mode
       if (e.key === ' ' && !spacePressed) {
@@ -393,13 +397,14 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [selectedElementIds, elements, clipboard, undo, redo, spacePressed, zoom, tool]);
+  }, [selectedElementIds, elements, clipboard, undo, redo, spacePressed, zoom, tool, editingText]);
 
   // ─── Mouse Handlers ─────────────────────────────────────────────
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = interactiveCanvasRef.current;
     if (!canvas) return;
+    if (editingText) return;
 
     // Right-click context menu
     if (e.button === 2) {
@@ -483,11 +488,9 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       }
     } else if (tool === Tool.TEXT) {
       // Start text editing
-      const screenPos = canvasToScreen(point.x, point.y);
+      setTextDraft('');
       setEditingText({ id: Date.now(), x: point.x, y: point.y });
       setAction(Action.WRITING);
-      // Focus textarea after render
-      setTimeout(() => textInputRef.current?.focus(), 50);
     } else if (tool === Tool.PENCIL) {
       setAction(Action.DRAWING);
       const newEl = createElement(Date.now(), point.x, point.y, point.x, point.y, tool, settings);
@@ -501,7 +504,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
         setDrawPreviewPoint(point);
       }
     }
-  }, [elements, selectedElementIds, tool, spacePressed, panOffset, zoom, settings, contextMenu, getMousePos, canvasToScreen, isShapeDrawingTool]);
+  }, [elements, selectedElementIds, tool, spacePressed, panOffset, zoom, settings, contextMenu, getMousePos, isShapeDrawingTool, editingText]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = interactiveCanvasRef.current;
@@ -871,8 +874,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
   // ─── Text Editing ───────────────────────────────────────────────
 
   const handleTextSubmit = useCallback(() => {
-    if (!editingText || !textInputRef.current) return;
-    const text = textInputRef.current.value.trim();
+    if (!editingText) return;
+    const text = textDraft.trim();
     if (text) {
       const newEl = createElement(editingText.id, editingText.x, editingText.y, editingText.x + 200, editingText.y + 30, Tool.TEXT, settings);
       if (newEl && newEl.type === Tool.TEXT) {
@@ -882,8 +885,9 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       }
     }
     setEditingText(null);
+    setTextDraft('');
     setAction(Action.NONE);
-  }, [editingText, elements, settings]);
+  }, [editingText, elements, settings, textDraft]);
 
   // ─── Context Menu Items ─────────────────────────────────────────
 
@@ -995,20 +999,24 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
         <textarea
           ref={textInputRef}
           className="absolute bg-transparent border-2 border-blue-400 outline-none resize font-virgil select-text pointer-events-auto"
+          value={textDraft}
           style={{
             left: `${editingText.x * zoom + panOffset.x}px`,
             top: `${editingText.y * zoom + panOffset.y}px`,
             fontSize: `${(settings.strokeWidth > 2 ? 24 : 20) * zoom}px`,
             color: settings.strokeColor || '#000',
+            background: 'rgba(255,255,255,0.95)',
             minWidth: '100px',
             minHeight: '30px',
             zIndex: 1000,
           }}
+          onChange={(e) => setTextDraft(e.target.value)}
           onBlur={handleTextSubmit}
           onKeyDown={(e) => {
             e.stopPropagation();
             if (e.key === 'Escape') {
               setEditingText(null);
+              setTextDraft('');
               setAction(Action.NONE);
             }
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -1018,6 +1026,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
           }}
           onMouseDown={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
+          placeholder="Type text..."
           autoFocus
         />
       )}
