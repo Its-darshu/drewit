@@ -214,6 +214,25 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
     renderStaticLayer(canvas, ctx, elements, config);
   }, [elements, zoom, panOffset, showGrid, resizeTick]);
 
+  const drawPreviewElement =
+    action === Action.DRAWING
+    && startPoint
+    && drawPreviewPoint
+    && isShapeDrawingTool(tool)
+      ? createElement(
+          -1,
+          startPoint.x,
+          startPoint.y,
+          drawPreviewPoint.x,
+          drawPreviewPoint.y,
+          tool,
+          {
+            ...settings,
+            opacity: 0.65,
+          },
+        )
+      : null;
+
   // Interactive layer render (overlays)
   useEffect(() => {
     const canvas = interactiveCanvasRef.current;
@@ -885,25 +904,6 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
   // ─── Selected Elements for Properties ───────────────────────────
 
   const selectedElements = elements.filter(el => selectedElementIds.includes(el.id));
-
-  const drawPreviewElement =
-    action === Action.DRAWING
-    && startPoint
-    && drawPreviewPoint
-    && isShapeDrawingTool(tool)
-      ? createElement(
-          -1,
-          startPoint.x,
-          startPoint.y,
-          drawPreviewPoint.x,
-          drawPreviewPoint.y,
-          tool,
-          {
-            ...settings,
-            opacity: 0.65,
-          },
-        )
-      : null;
 
   // ─── Render ─────────────────────────────────────────────────────
 
