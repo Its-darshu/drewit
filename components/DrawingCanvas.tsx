@@ -995,7 +995,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       {editingText && (
         <textarea
           ref={textInputRef}
-          className="drewit-text-editor absolute bg-transparent border-2 border-blue-400 outline-none resize font-virgil select-text pointer-events-auto"
+          className="drewit-text-editor absolute border-2 border-blue-400 outline-none resize font-virgil select-text pointer-events-auto"
           value={textDraft}
           style={{
             left: `${editingText.x * zoom + panOffset.x}px`,
