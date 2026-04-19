@@ -15,7 +15,7 @@
  *  - Properties panel for element editing
  */
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useState, useCallback } from 'react';
 import { SketchElement, Tool, Action, Position, PencilElement, Point } from '../types';
 import {
   drawElement,
@@ -261,12 +261,9 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!editingText) return;
-    const timeoutId = window.setTimeout(() => {
-      textInputRef.current?.focus();
-    }, 0);
-    return () => window.clearTimeout(timeoutId);
+    textInputRef.current?.focus();
   }, [editingText]);
 
   // ─── Zoom Functions ─────────────────────────────────────────────
@@ -998,14 +995,13 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       {editingText && (
         <textarea
           ref={textInputRef}
-          className="absolute bg-transparent border-2 border-blue-400 outline-none resize font-virgil select-text pointer-events-auto"
+          className="drewit-text-editor absolute bg-transparent border-2 border-blue-400 outline-none resize font-virgil select-text pointer-events-auto"
           value={textDraft}
           style={{
             left: `${editingText.x * zoom + panOffset.x}px`,
             top: `${editingText.y * zoom + panOffset.y}px`,
             fontSize: `${(settings.strokeWidth > 2 ? 24 : 20) * zoom}px`,
             color: settings.strokeColor || '#000',
-            background: 'rgba(255,255,255,0.95)',
             minWidth: '100px',
             minHeight: '30px',
             zIndex: 1000,
