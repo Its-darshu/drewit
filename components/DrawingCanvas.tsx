@@ -371,8 +371,9 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
           v: Tool.SELECTION, r: Tool.RECTANGLE, o: Tool.ELLIPSE, d: Tool.DIAMOND,
           l: Tool.LINE, a: Tool.ARROW, p: Tool.PENCIL, t: Tool.TEXT, e: Tool.ERASER,
         };
-        if (toolMap[e.key]) {
-          setTool(toolMap[e.key]);
+        const key = e.key.toLowerCase();
+        if (toolMap[key]) {
+          setTool(toolMap[key]);
           e.preventDefault();
         }
       }
