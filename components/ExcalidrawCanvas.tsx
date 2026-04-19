@@ -5,7 +5,8 @@ import {
   serializeAsJSON,
   WelcomeScreen,
 } from '@excalidraw/excalidraw';
-import type { AppState, BinaryFiles, ExcalidrawElement } from '@excalidraw/excalidraw/types';
+import type { AppState, BinaryFiles } from '@excalidraw/excalidraw/types';
+import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types';
 import '@excalidraw/excalidraw/index.css';
 import { localStorageService } from '../services/localStorageService';
 
@@ -172,13 +173,13 @@ export const ExcalidrawCanvas: React.FC<ExcalidrawCanvasProps> = ({ projectName 
 
   return (
     <div className="h-full w-full relative">
-      <div className="absolute top-3 right-3 z-20 flex items-center gap-2 bg-white/95 border border-gray-200 rounded-lg px-3 py-2 shadow-sm">
-        <span className={`text-xs font-medium ${saveStatus === 'error' ? 'text-red-600' : 'text-gray-600'}`}>
+      <div className="absolute top-3 right-3 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-md border border-slate-200 rounded-xl px-3 py-2 shadow-md">
+        <span className={`text-xs font-semibold ${saveStatus === 'error' ? 'text-rose-600' : 'text-slate-700'}`}>
           {statusLabel}
         </span>
         <button
           onClick={handleExportSceneJSON}
-          className="text-xs px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-50"
+          className="text-xs px-2 py-1 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
           type="button"
         >
           Export Scene

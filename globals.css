@@ -8,8 +8,73 @@ html, body, #root {
 
 body {
 	margin: 0;
+	font-family: 'Manrope', 'Segoe UI', sans-serif;
+	background: radial-gradient(circle at 12% 8%, #ffe6cc 0%, transparent 32%),
+		linear-gradient(165deg, #f8f1e9 0%, #f3f8ff 52%, #eef8ef 100%);
+	color: #17212b;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+	--brand-ink: #16212d;
+	--brand-muted: #5a6a78;
+	--brand-surface: rgba(255, 255, 255, 0.78);
+	--brand-surface-solid: #ffffff;
+	--brand-border: rgba(24, 34, 44, 0.11);
+	--brand-accent: #eb5e28;
+	--brand-accent-strong: #d94c18;
+	--brand-accent-soft: #ffe2d3;
+	--brand-success: #2f8750;
+	--brand-danger: #cc3030;
+	--brand-shadow: 0 22px 48px rgba(16, 28, 40, 0.12);
+}
+
+.app-shell {
+	min-height: 100%;
+	background: linear-gradient(170deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.46));
+}
+
+.glass-panel {
+	background: var(--brand-surface);
+	backdrop-filter: blur(14px);
+	border: 1px solid var(--brand-border);
+	box-shadow: var(--brand-shadow);
+	border-radius: 22px;
+}
+
+.brand-title {
+	font-family: 'Space Grotesk', 'Manrope', sans-serif;
+	letter-spacing: -0.02em;
+	color: var(--brand-ink);
+}
+
+.brand-muted {
+	color: var(--brand-muted);
+}
+
+.brand-button {
+	border: 0;
+	border-radius: 14px;
+	padding: 0.68rem 1.1rem;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(120deg, var(--brand-accent), #ff934f);
+	box-shadow: 0 10px 24px rgba(235, 94, 40, 0.28);
+	transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.brand-button:hover {
+	transform: translateY(-1px);
+	filter: saturate(1.06);
+	box-shadow: 0 16px 30px rgba(235, 94, 40, 0.34);
+}
+
+.brand-button:disabled {
+	opacity: 0.56;
+	cursor: not-allowed;
+	transform: none;
+	box-shadow: none;
 }
 
 canvas {

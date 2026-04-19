@@ -175,11 +175,11 @@ export const Dashboard = () => {
 
   if (selectedProject) {
     return (
-      <div className="h-screen flex flex-col">
-        <header className="bg-white shadow-sm border-b px-4 py-2 flex items-center justify-between">
+      <div className="h-screen flex flex-col app-shell">
+        <header className="px-4 sm:px-6 py-3 border-b border-slate-200/70 bg-white/90 backdrop-blur-lg flex items-center justify-between">
           <button
             onClick={() => setSelectedProject(null)}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+            className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 text-sm font-medium"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -188,12 +188,12 @@ export const Dashboard = () => {
           </button>
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center rounded-md border border-gray-300 overflow-hidden">
+            <div className="flex items-center rounded-xl border border-slate-300 overflow-hidden bg-white shadow-sm">
               <button
                 type="button"
                 onClick={() => setEditorMode('drewit')}
-                className={`px-3 py-1 text-xs font-medium ${
-                  editorMode === 'drewit' ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                className={`px-3 py-1.5 text-xs font-semibold ${
+                  editorMode === 'drewit' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 DrewIt Engine
@@ -201,20 +201,20 @@ export const Dashboard = () => {
               <button
                 type="button"
                 onClick={() => setEditorMode('excalidraw')}
-                className={`px-3 py-1 text-xs font-medium ${
-                  editorMode === 'excalidraw' ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                className={`px-3 py-1.5 text-xs font-semibold ${
+                  editorMode === 'excalidraw' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 Excalidraw Engine
               </button>
             </div>
-            <span className="text-sm text-gray-500">{selectedProject}</span>
+            <span className="text-sm text-slate-600 font-semibold">{selectedProject}</span>
             {saveDirectory && (
-              <span className="text-xs text-gray-400">📁 {saveDirectory}</span>
+              <span className="text-xs text-slate-500">📁 {saveDirectory}</span>
             )}
             <button
               onClick={handleLogout}
-              className="text-sm text-red-600 hover:text-red-800"
+              className="text-sm text-rose-600 hover:text-rose-700 font-semibold"
             >
               Logout
             </button>
@@ -232,28 +232,29 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
+    <div className="app-shell min-h-screen">
+      <header className="border-b border-slate-200/70 bg-white/80 backdrop-blur-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">SketchBoard</h1>
-              <p className="text-sm text-gray-500">Welcome back, {user?.displayName}</p>
+              <p className="text-xs font-semibold tracking-[0.22em] uppercase text-amber-700">Workspace</p>
+              <h1 className="brand-title text-3xl font-bold mt-1">SketchBoard Studio</h1>
+              <p className="text-sm brand-muted mt-1">Welcome back, {user?.displayName}</p>
             </div>
             <div className="flex items-center space-x-4">
               {saveDirectory && (
-                <div className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-md">
+                <div className="text-sm text-slate-700 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200">
                   📁 {saveDirectory}
                 </div>
               )}
               <img
                 src={user?.photoURL || ''}
                 alt={user?.displayName || ''}
-                className="w-8 h-8 rounded-full"
+                className="w-9 h-9 rounded-full ring-2 ring-orange-200"
               />
               <button
                 onClick={handleLogout}
-                className="text-sm text-red-600 hover:text-red-800"
+                className="text-sm text-rose-600 hover:text-rose-700 font-semibold"
               >
                 Logout
               </button>
@@ -262,28 +263,28 @@ export const Dashboard = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Status Messages */}
         {statusMessage && (
-          <div className={`mb-6 p-4 rounded-lg border-2 ${
-            statusMessage.type === 'success' ? 'bg-green-50 border-green-200' :
-            statusMessage.type === 'error' ? 'bg-red-50 border-red-200' :
-            'bg-blue-50 border-blue-200'
+          <div className={`mb-6 p-4 rounded-2xl border ${
+            statusMessage.type === 'success' ? 'bg-emerald-50 border-emerald-200' :
+            statusMessage.type === 'error' ? 'bg-rose-50 border-rose-200' :
+            'bg-amber-50 border-amber-200'
           }`}>
             <div className="flex items-start">
               <div className={`flex-shrink-0 text-xl ${
-                statusMessage.type === 'success' ? 'text-green-500' :
-                statusMessage.type === 'error' ? 'text-red-500' :
-                'text-blue-500'
+                statusMessage.type === 'success' ? 'text-emerald-500' :
+                statusMessage.type === 'error' ? 'text-rose-500' :
+                'text-amber-500'
               }`}>
                 {statusMessage.type === 'success' ? '✅' : 
                  statusMessage.type === 'error' ? '❌' : 'ℹ️'}
               </div>
               <div className="ml-3 flex-1">
                 <p className={`text-sm ${
-                  statusMessage.type === 'success' ? 'text-green-800' :
-                  statusMessage.type === 'error' ? 'text-red-800' :
-                  'text-blue-800'
+                  statusMessage.type === 'success' ? 'text-emerald-900' :
+                  statusMessage.type === 'error' ? 'text-rose-900' :
+                  'text-amber-900'
                 }`}>
                   {statusMessage.text}
                 </p>
@@ -302,14 +303,14 @@ export const Dashboard = () => {
 
         {/* Storage Settings */}
         {!saveDirectory && localStorageService.isFileSystemAccessSupported() && (
-          <div className="mb-6 p-6 bg-blue-50 border-2 border-blue-200 rounded-lg">
-            <h3 className="text-lg font-medium text-blue-900 mb-2">💾 Save Work Locally</h3>
-            <p className="text-sm text-blue-700 mb-4">
+          <div className="mb-6 p-6 glass-panel">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">💾 Save Work Locally</h3>
+            <p className="text-sm brand-muted mb-4">
               Choose where to save your drawings on your computer. Your work will be saved automatically and persist between sessions.
             </p>
             <button
               onClick={handleSelectDirectory}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="brand-button"
             >
               Select Save Location
             </button>
@@ -318,32 +319,35 @@ export const Dashboard = () => {
 
         {/* Storage Stats */}
         {storageStats && (
-          <div className="mb-4 p-3 bg-gray-100 rounded-lg text-sm text-gray-600">
+          <div className="mb-4 p-4 glass-panel text-sm text-slate-700">
             <div className="flex justify-between items-center">
               <span>Storage: {formatBytes(storageStats.usage)} / {formatBytes(storageStats.quota)}</span>
-              <span className="text-xs">{storageStats.percentUsed.toFixed(1)}% used</span>
+              <span className="text-xs font-semibold">{storageStats.percentUsed.toFixed(1)}% used</span>
             </div>
-            <div className="mt-1 w-full bg-gray-300 rounded-full h-1.5">
+            <div className="mt-2 w-full bg-slate-200 rounded-full h-2">
               <div 
-                className="bg-blue-600 h-1.5 rounded-full" 
+                className="bg-gradient-to-r from-orange-500 to-amber-500 h-2 rounded-full" 
                 style={{ width: `${Math.min(storageStats.percentUsed, 100)}%` }}
               />
             </div>
           </div>
         )}
 
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-medium text-gray-900">Your Projects</h2>
+        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center mb-6">
+          <div>
+            <h2 className="brand-title text-2xl font-bold">Your Projects</h2>
+            <p className="text-sm brand-muted mt-1">Open, manage, and continue your latest design boards.</p>
+          </div>
           <div className="flex space-x-3">
             <button
               onClick={() => setShowImportModal(true)}
-              className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-semibold"
             >
               Import
             </button>
             <button
               onClick={() => setShowNewProjectModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="brand-button"
             >
               New Project
             </button>
@@ -352,13 +356,13 @@ export const Dashboard = () => {
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-sm text-gray-500">Loading projects...</p>
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-orange-200 border-t-orange-500 mx-auto"></div>
+            <p className="mt-3 text-sm brand-muted">Loading projects...</p>
           </div>
         ) : projects.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-14 glass-panel">
             <svg
-              className="mx-auto h-12 w-12 text-gray-400"
+              className="mx-auto h-12 w-12 text-slate-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -370,12 +374,12 @@ export const Dashboard = () => {
                 d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
               />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No projects yet</h3>
-            <p className="mt-1 text-sm text-gray-500">Create your first project to start drawing.</p>
+            <h3 className="mt-3 text-base font-semibold text-slate-900">No projects yet</h3>
+            <p className="mt-1 text-sm brand-muted">Create your first project to start drawing.</p>
             <div className="mt-6">
               <button
                 onClick={() => setShowNewProjectModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                className="brand-button"
               >
                 Create Project
               </button>
@@ -386,14 +390,14 @@ export const Dashboard = () => {
             {projects.map((project) => (
               <div
                 key={project.id}
-                className="bg-white rounded-lg shadow hover:shadow-md transition-shadow group relative"
+                className="glass-panel overflow-hidden hover:-translate-y-1 transition-all duration-200 group relative"
               >
                 <div 
-                  className="aspect-w-16 aspect-h-10 bg-gray-100 rounded-t-lg cursor-pointer"
+                  className="cursor-pointer"
                   onClick={() => setSelectedProject(project.name)}
                 >
-                  <div className="w-full h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-full h-32 bg-gradient-to-br from-orange-200/70 via-amber-100/80 to-sky-100 rounded-t-[22px] flex items-center justify-center">
+                    <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                   </div>
@@ -405,7 +409,7 @@ export const Dashboard = () => {
                     e.stopPropagation();
                     handleDeleteProject(project.name);
                   }}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-rose-500 text-white p-1.5 rounded-full hover:bg-rose-600"
                   title="Delete project"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -417,12 +421,12 @@ export const Dashboard = () => {
                   className="p-4 cursor-pointer"
                   onClick={() => setSelectedProject(project.name)}
                 >
-                  <h3 className="text-sm font-medium text-gray-900 truncate">{project.name}</h3>
+                  <h3 className="text-base font-semibold text-slate-900 truncate">{project.name}</h3>
                   <div className="flex justify-between items-center mt-2">
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-slate-500">
                       {formatDate(project.lastModified)}
                     </p>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-slate-500 font-semibold">
                       {project.data.elements?.length || 0} elements
                     </span>
                   </div>
@@ -435,12 +439,13 @@ export const Dashboard = () => {
 
       {/* New Project Modal */}
       {showNewProjectModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">New Project</h3>
+        <div className="fixed inset-0 bg-slate-900/35 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="glass-panel p-6 w-full max-w-md">
+            <h3 className="text-xl brand-title font-bold text-slate-900 mb-2">New Project</h3>
+            <p className="text-sm brand-muted mb-4">Start a fresh board and switch between engines anytime.</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
                   Project Name *
                 </label>
                 <input
@@ -448,7 +453,7 @@ export const Dashboard = () => {
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
                   placeholder="My Drawing"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2.5 bg-white/80 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-300"
                   onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleCreateProject()}
                   autoFocus
                 />
@@ -460,14 +465,14 @@ export const Dashboard = () => {
                   setShowNewProjectModal(false);
                   setNewProjectName('');
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                className="px-4 py-2 text-sm font-semibold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateProject}
                 disabled={!newProjectName.trim() || loading}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="brand-button text-sm"
               >
                 Create
               </button>
@@ -478,12 +483,13 @@ export const Dashboard = () => {
 
       {/* Import Modal */}
       {showImportModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Import Project</h3>
+        <div className="fixed inset-0 bg-slate-900/35 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="glass-panel p-6 w-full max-w-md">
+            <h3 className="text-xl brand-title font-bold text-slate-900 mb-2">Import Project</h3>
+            <p className="text-sm brand-muted mb-4">Upload a .drewit.json file to add it to your workspace.</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Select a .drewit.json file
                 </label>
                 <input
@@ -493,14 +499,14 @@ export const Dashboard = () => {
                     const file = e.target.files?.[0];
                     if (file) handleImportProject(file);
                   }}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white/80 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-100 file:text-orange-700 hover:file:bg-orange-200"
                 />
               </div>
             </div>
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={() => setShowImportModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                className="px-4 py-2 text-sm font-semibold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200"
               >
                 Cancel
               </button>
