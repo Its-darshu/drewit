@@ -33,6 +33,7 @@ export interface RenderConfig {
   snapLines: SnapLine[];
   bindingTarget: SketchElement | null;
   dragPreviewOffset: { x: number; y: number } | null;
+  drawPreviewElement?: SketchElement | null;
   isPanning: boolean;
   isRotating: boolean;
 }
@@ -186,6 +187,12 @@ export const renderInteractiveLayer = (
   // Drag preview
   if (config.dragPreviewOffset && config.selectedElementIds.length > 0) {
     renderDragPreview(ctx, elements, config.selectedElementIds, config.dragPreviewOffset, config.zoom, canvas);
+  }
+
+  // Live shape preview while drawing
+  if (config.drawPreviewElement) {
+    const roughCanvas = rough.canvas(canvas);
+    drawElement(roughCanvas, ctx, config.drawPreviewElement);
   }
 
   ctx.restore();

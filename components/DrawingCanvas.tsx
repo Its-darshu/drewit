@@ -226,11 +226,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       selectedElementIds, hoveredElementId,
       selectionBox, snapLines,
       bindingTarget, dragPreviewOffset,
+      drawPreviewElement,
       isPanning, isRotating: !!rotationInfo,
     };
 
     renderInteractiveLayer(canvas, ctx, elements, config);
-  }, [elements, selectedElementIds, hoveredElementId, selectionBox, snapLines, bindingTarget, dragPreviewOffset, zoom, panOffset, isPanning, rotationInfo, resizeTick]);
+  }, [elements, selectedElementIds, hoveredElementId, selectionBox, snapLines, bindingTarget, dragPreviewOffset, drawPreviewElement, zoom, panOffset, isPanning, rotationInfo, resizeTick]);
 
   // Resize handler
   useEffect(() => {
@@ -885,28 +886,24 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
 
   const selectedElements = elements.filter(el => selectedElementIds.includes(el.id));
 
-  const drawPreviewMetrics =
+  const drawPreviewElement =
     action === Action.DRAWING
     && startPoint
     && drawPreviewPoint
     && isShapeDrawingTool(tool)
-      ? {
-          minX: Math.min(startPoint.x, drawPreviewPoint.x),
-          minY: Math.min(startPoint.y, drawPreviewPoint.y),
-          maxX: Math.max(startPoint.x, drawPreviewPoint.x),
-          maxY: Math.max(startPoint.y, drawPreviewPoint.y),
-          width: Math.abs(drawPreviewPoint.x - startPoint.x),
-          height: Math.abs(drawPreviewPoint.y - startPoint.y),
-        }
+      ? createElement(
+          -1,
+          startPoint.x,
+          startPoint.y,
+          drawPreviewPoint.x,
+          drawPreviewPoint.y,
+          tool,
+          {
+            ...settings,
+            opacity: 0.65,
+          },
+        )
       : null;
-
-  const drawPreviewScreen = drawPreviewMetrics
-    ? {
-        topLeft: canvasToScreen(drawPreviewMetrics.minX, drawPreviewMetrics.minY),
-        width: drawPreviewMetrics.width * zoom,
-        height: drawPreviewMetrics.height * zoom,
-      }
-    : null;
 
   // ─── Render ─────────────────────────────────────────────────────
 
@@ -990,30 +987,6 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
           onClose={() => setContextMenu(null)}
           items={contextMenuItems}
         />
-      )}
-
-      {/* Live drawing preview with position and size */}
-      {drawPreviewMetrics && drawPreviewScreen && (
-        <>
-          <div
-            className="drewit-draw-preview-box"
-            style={{
-              left: `${drawPreviewScreen.topLeft.x}px`,
-              top: `${drawPreviewScreen.topLeft.y}px`,
-              width: `${Math.max(drawPreviewScreen.width, 1)}px`,
-              height: `${Math.max(drawPreviewScreen.height, 1)}px`,
-            }}
-          />
-          <div
-            className="drewit-draw-preview-metrics"
-            style={{
-              left: `${drawPreviewScreen.topLeft.x + 8}px`,
-              top: `${drawPreviewScreen.topLeft.y - 36}px`,
-            }}
-          >
-            {`x: ${Math.round(drawPreviewMetrics.minX)} y: ${Math.round(drawPreviewMetrics.minY)} | w: ${Math.round(drawPreviewMetrics.width)} h: ${Math.round(drawPreviewMetrics.height)}`}
-          </div>
-        </>
       )}
 
       {/* Text editing textarea */}
