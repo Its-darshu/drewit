@@ -311,7 +311,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       const ctrl = e.ctrlKey || e.metaKey;
       const target = e.target as HTMLElement;
 
-      // Ignore when typing
+      // Ignore when typing (and while text mode is active but focus hasn't landed yet).
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable || editingText) return;
 
       // Spacebar pan mode
