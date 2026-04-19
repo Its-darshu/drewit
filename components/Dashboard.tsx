@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { DrawingCanvas } from './DrawingCanvas';
+import { ExcalidrawCanvas } from './ExcalidrawCanvas';
 import { localStorageService, ProjectFile } from '../services/localStorageService';
 
 export const Dashboard = () => {
@@ -14,6 +15,7 @@ export const Dashboard = () => {
   const [storageStats, setStorageStats] = useState<any>(null);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [editorMode, setEditorMode] = useState<'drewit' | 'excalidraw'>('drewit');
   const statusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check if directory is already selected
@@ -186,6 +188,26 @@ export const Dashboard = () => {
           </button>
           
           <div className="flex items-center space-x-4">
+            <div className="flex items-center rounded-md border border-gray-300 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setEditorMode('drewit')}
+                className={`px-3 py-1 text-xs font-medium ${
+                  editorMode === 'drewit' ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                DrewIt Engine
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditorMode('excalidraw')}
+                className={`px-3 py-1 text-xs font-medium ${
+                  editorMode === 'excalidraw' ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Excalidraw Engine
+              </button>
+            </div>
             <span className="text-sm text-gray-500">{selectedProject}</span>
             {saveDirectory && (
               <span className="text-xs text-gray-400">📁 {saveDirectory}</span>
@@ -199,7 +221,11 @@ export const Dashboard = () => {
           </div>
         </header>
         <div className="flex-1">
-          <DrawingCanvas projectName={selectedProject} />
+          {editorMode === 'drewit' ? (
+            <DrawingCanvas projectName={selectedProject} />
+          ) : (
+            <ExcalidrawCanvas projectName={selectedProject} />
+          )}
         </div>
       </div>
     );
