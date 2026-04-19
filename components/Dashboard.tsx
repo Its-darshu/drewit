@@ -30,7 +30,17 @@ export const Dashboard = () => {
     setLoading(true);
     try {
       const projectList = await localStorageService.listProjects();
-      setProjects(projectList);
+      const normalizedProjects = projectList
+        .filter((project): project is ProjectFile => !!project && typeof project.name === 'string' && project.name.trim().length > 0)
+        .map((project) => ({
+          ...project,
+          data: {
+            ...(project.data || {}),
+            elements: Array.isArray(project.data?.elements) ? project.data.elements : [],
+          },
+          lastModified: typeof project.lastModified === 'number' ? project.lastModified : Date.now(),
+        }));
+      setProjects(normalizedProjects);
     } catch (error) {
       console.error('Failed to load projects:', error);
       showStatus('error', 'Failed to load projects');
@@ -363,7 +373,7 @@ export const Dashboard = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {projects.map((project) => (
               <div
-                key={project.id}
+                key={project.id || project.name}
                 className="glass-panel overflow-hidden hover:-translate-y-1 transition-all duration-200 group relative"
               >
                 <div 
@@ -401,7 +411,7 @@ export const Dashboard = () => {
                       {formatDate(project.lastModified)}
                     </p>
                     <span className="text-xs text-slate-500 font-semibold">
-                      {project.data.elements?.length || 0} elements
+                      {Array.isArray(project.data?.elements) ? project.data.elements.length : 0} elements
                     </span>
                   </div>
                 </div>
