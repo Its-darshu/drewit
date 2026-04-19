@@ -993,7 +993,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       {editingText && (
         <textarea
           ref={textInputRef}
-          className="absolute bg-transparent border-2 border-blue-400 outline-none resize font-virgil"
+          className="absolute bg-transparent border-2 border-blue-400 outline-none resize font-virgil select-text pointer-events-auto"
           style={{
             left: `${editingText.x * zoom + panOffset.x}px`,
             top: `${editingText.y * zoom + panOffset.y}px`,
@@ -1005,6 +1005,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
           }}
           onBlur={handleTextSubmit}
           onKeyDown={(e) => {
+            e.stopPropagation();
             if (e.key === 'Escape') {
               setEditingText(null);
               setAction(Action.NONE);
@@ -1014,6 +1015,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
               handleTextSubmit();
             }
           }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
           autoFocus
         />
       )}
