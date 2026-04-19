@@ -12,9 +12,6 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        // Legacy defines (keeping for compatibility)
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         // Firebase environment variables for production builds
         'import.meta.env.VITE_FIREBASE_API_KEY': JSON.stringify(env.VITE_FIREBASE_API_KEY),
         'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN': JSON.stringify(env.VITE_FIREBASE_AUTH_DOMAIN),

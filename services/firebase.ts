@@ -20,22 +20,12 @@ type Config = Record<RequiredEnvKey, string> & {
 
 const readConfig = (): Config => {
   const config = {} as Config;
-  
-  // Debug: Log available environment variables
-  console.log('Environment variables available:', {
-    NODE_ENV: import.meta.env.NODE_ENV,
-    MODE: import.meta.env.MODE,
-    PROD: import.meta.env.PROD,
-    DEV: import.meta.env.DEV,
-    envKeys: Object.keys(import.meta.env).filter(key => key.startsWith('VITE_'))
-  });
-  
+
   for (const key of requiredKeys) {
     const value = import.meta.env[key];
     if (!value) {
       console.error(`Missing Firebase config value: ${key}`);
-      console.error('Available env vars:', Object.keys(import.meta.env));
-      
+
       // Fallback: Try to get from window object (for Vercel deployment)
       const fallbackValue = (window as any).__FIREBASE_CONFIG__?.[key];
       if (fallbackValue) {
