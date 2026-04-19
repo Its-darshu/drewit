@@ -993,7 +993,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ projectName, onBac
       {editingText && (
         <textarea
           ref={textInputRef}
-          className="fixed bg-transparent border-2 border-blue-400 outline-none resize font-virgil"
+          className="absolute bg-transparent border-2 border-blue-400 outline-none resize font-virgil"
           style={{
             left: `${editingText.x * zoom + panOffset.x}px`,
             top: `${editingText.y * zoom + panOffset.y}px`,
